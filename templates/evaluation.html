@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CogniShield · Evaluation Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body data-theme="dark" class="docs-page">
+  <header class="docs-topbar">
+    <a class="brand" href="{{ url_for('index') }}"><span class="shield-mark">⌬</span><span>Cogni<span>Shield</span></span></a>
+    <nav class="docs-nav"><a href="{{ url_for('index') }}">← Back to workspace</a><button id="docs-theme-toggle" class="theme-toggle" type="button" aria-label="Switch to light mode" aria-pressed="false"><span></span><i>☼</i><b>☾</b></button></nav>
+  </header>
+  <main class="docs-main evaluation-main">
+    <div class="docs-hero"><p class="eyebrow">Research evaluation</p><h1>Evidence, not just a <span>demo.</span></h1><p>Quality, JPEG robustness, and fixed-protocol SD-Turbo divergence results from the most recently completed evaluation run.</p></div>
+    {% if summary %}
+      <section class="evaluation-run panel">
+        <div><span class="card-index">Latest completed run</span><h2>{{ run_name }}</h2><p>{{ summary.images_processed }} of {{ summary.images_requested }} images processed · {{ summary.target_images_evaluated }} SD-Turbo comparisons</p></div>
+        <div class="evaluation-actions"><a class="button subtle" href="{{ url_for('evaluation_file', run_name=run_name, filename='results.csv') }}">⇩ Download CSV</a>{% if report %}<a class="button primary" href="{{ url_for('evaluation_file', run_name=run_name, filename='report.md') }}">⌁ Download report</a>{% endif %}</div>
+      </section>
+      <section class="evaluation-cards">
+        <article><span>Quality pass rate</span><strong>{{ summary.rates.quality_pass_rate if summary.rates.quality_pass_rate is not none else '—' }}%</strong><small>PSNR ≥ {{ summary.criteria.quality_psnr_min }} dB and SSIM ≥ {{ summary.criteria.quality_ssim_min }}</small></article>
+        <article><span>JPEG pass rate</span><strong>{{ summary.rates.jpeg_pass_rate if summary.rates.jpeg_pass_rate is not none else '—' }}%</strong><small>Every selected JPEG test meets SSIM ≥ {{ summary.criteria.jpeg_ssim_min }}</small></article>
+        <article><span>Target divergence</span><strong>{{ summary.rates.target_divergence_rate if summary.rates.target_divergence_rate is not none else '—' }}%</strong><small>SD-Turbo output SSIM ≤ {{ summary.criteria.target_output_ssim_max }}</small></article>
+        <article class="accent"><span>Combined success</span><strong>{{ summary.rates.combined_success_rate if summary.rates.combined_success_rate is not none else '—' }}%</strong><small>Quality pass and target divergence on the same image</small></article>
+      </section>
+      {% if charts %}<section class="evaluation-chart panel"><div class="panel-heading"><h2>Evaluation charts</h2><span>Full 500-image run summary</span></div><img src="{{ url_for('evaluation_file', run_name=run_name, filename='evaluation_charts.png') }}" alt="CogniShield evaluation charts"></section>{% endif %}
+      <section class="evaluation-table panel"><div class="panel-heading"><h2>Protocol</h2><span>Fixed before execution</span></div><dl><div><dt>Perturbation budget</dt><dd>{{ summary.config.epsilon_pixels }}/255</dd></div><div><dt>Seed</dt><dd>{{ summary.config.seed }}</dd></div><div><dt>Feedback steps</dt><dd>{{ summary.config.iterations }}</dd></div><div><dt>JPEG qualities</dt><dd>{{ summary.config.qualities | join(', ') }}</dd></div><div><dt>Mean protected SSIM</dt><dd>{{ summary.averages.quality_ssim }}</dd></div><div><dt>Mean protected PSNR</dt><dd>{{ summary.averages.quality_psnr }} dB</dd></div></dl></section>
+      <p class="evaluation-note">“Target divergence” is a protocol-specific success rate, not a universal classifier accuracy. It describes the proportion of fixed-prompt, fixed-seed SD-Turbo comparisons that crossed the predefined similarity threshold.</p>
+    {% else %}
+      <section class="empty-evaluation panel"><div>◌</div><h2>No evaluation run yet</h2><p>Run the 500-image evaluation from PowerShell. Once complete, refresh this page to view its results.</p><code>.\.venv\Scripts\python.exe run_evaluation.py --input-dir data\input --run-name coco500</code></section>
+    {% endif %}
+  </main>
+  <script>const toggle=document.getElementById('docs-theme-toggle'),savedTheme=localStorage.getItem('cognishield-theme');if(savedTheme==='light'){document.body.dataset.theme='light';toggle.setAttribute('aria-pressed','true')}toggle.addEventListener('click',()=>{const light=document.body.dataset.theme==='light';document.body.dataset.theme=light?'dark':'light';toggle.setAttribute('aria-pressed',String(!light));localStorage.setItem('cognishield-theme',document.body.dataset.theme)});</script>
+</body>
+</html>

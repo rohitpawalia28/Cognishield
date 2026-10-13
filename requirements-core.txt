@@ -1,0 +1,7 @@
+cryptography
+numpy
+opencv-python
+pandas
+Pillow
+scikit-image
+Flask

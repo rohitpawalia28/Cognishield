@@ -1,0 +1,7 @@
+accelerate
+diffusers
+hf_xet
+huggingface_hub
+matplotlib
+safetensors
+transformers

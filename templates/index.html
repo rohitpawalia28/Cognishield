@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="CogniShield image protection and provenance workspace">
+  <title>CogniShield · Image Protection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body data-theme="dark">
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Protection settings">
+      <a class="brand" href="#top" aria-label="CogniShield home">
+        <span class="shield-mark">⌬</span><span>Cogni<span>Shield</span></span>
+      </a>
+      <p class="brand-note">Protect your images from AI misuse.</p>
+
+      <form id="protection-form">
+        <div class="sidebar-title"><span>Protection settings</span><span class="status-dot" title="Ready"></span></div>
+
+        <label class="field-label" for="epsilon">Perturbation budget <output id="epsilon-value">8</output></label>
+        <input class="range" id="epsilon" name="epsilon" type="range" min="1" max="16" value="8">
+        <p class="field-help">Higher means stronger protection.</p>
+
+        <label class="field-label" for="iterations">Compression feedback <output id="iterations-value">4</output></label>
+        <input class="range" id="iterations" name="iterations" type="range" min="0" max="8" value="4">
+        <p class="field-help">Improves JPEG robustness.</p>
+
+        <label class="field-label" for="seed">Seed</label>
+        <div class="number-control">
+          <input id="seed" name="seed" type="number" min="0" max="999999" value="42">
+          <button type="button" class="number-button" data-step="-1" aria-label="Decrease seed">−</button>
+          <button type="button" class="number-button" data-step="1" aria-label="Increase seed">+</button>
+        </div>
+        <p class="field-help">Same seed, same result.</p>
+
+        <fieldset class="jpeg-fieldset">
+          <legend class="field-label">JPEG tests</legend>
+          <div class="quality-options">
+            <label><input type="checkbox" name="qualities" value="95" checked><span>95</span></label>
+            <label><input type="checkbox" name="qualities" value="85"><span>85</span></label>
+            <label><input type="checkbox" name="qualities" value="75" checked><span>75</span></label>
+            <label><input type="checkbox" name="qualities" value="60"><span>60</span></label>
+            <label><input type="checkbox" name="qualities" value="50" checked><span>50</span></label>
+          </div>
+          <p class="field-help">Test protection after compression.</p>
+        </fieldset>
+
+        <label class="check-row"><input id="run-model" type="checkbox"><span class="checkmark"></span><span>Run SD-Turbo target test</span></label>
+        <div id="prompt-wrap" class="prompt-wrap" hidden>
+          <label class="field-label" for="prompt">Target prompt</label>
+          <input id="prompt" name="prompt" type="text" value="a realistic portrait photograph, natural lighting">
+        </div>
+      </form>
+
+      <div class="sidebar-footer"><span class="pulse"></span> Local processing only</div>
+    </aside>
+
+    <main id="top" class="workspace">
+      <header class="topbar">
+        <div><p class="eyebrow">Image safety workspace</p><h1>Cogni<span>Shield</span></h1></div>
+        <div class="header-actions">
+          <a href="{{ url_for('evaluation') }}" class="text-link">Evaluation</a>
+          <a href="{{ url_for('how_it_works') }}" class="text-link">How it works</a>
+          <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to light mode" aria-pressed="false"><span></span><i>☼</i><b>☾</b></button>
+        </div>
+      </header>
+
+      <section class="hero-copy">
+        <p>Edge-based adversarial immunization and signed provenance for digital images.</p>
+      </section>
+
+      <section class="work-grid" aria-label="Image protection workflow">
+        <section class="upload-panel panel">
+          <div id="dropzone" class="dropzone" role="button" tabindex="0" aria-label="Upload an image">
+            <input id="image-input" name="image" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+            <div id="upload-empty" class="upload-empty">
+              <div class="upload-icon">⇧</div>
+              <h2>Upload an image</h2>
+              <p>Drag and drop an image here, or select one from your device.</p>
+              <button id="browse-button" class="button primary" type="button">Choose image</button>
+              <small>PNG, JPG or WEBP · Max 200 MB</small>
+            </div>
+            <div id="upload-preview" class="upload-preview" hidden>
+              <img id="preview-image" alt="Selected image preview">
+              <div><strong id="file-name"></strong><span>Ready to protect</span></div>
+              <button id="change-image" class="icon-button" type="button" aria-label="Choose another image">↻</button>
+            </div>
+          </div>
+          <button id="protect-button" class="button protect-button" type="button" disabled><span>⌬</span> Protect image</button>
+          <p id="upload-message" class="upload-message" role="status">Choose an image to begin.</p>
+        </section>
+
+        <section class="results-panel panel" aria-live="polite">
+          <div class="panel-heading"><h2>Result</h2><span id="result-state" class="result-state">Waiting</span></div>
+          <div id="result-empty" class="result-empty"><div>✦</div><p>Your protected image will appear here.</p></div>
+          <div id="result-content" hidden>
+            <div class="image-comparison">
+              <figure><figcaption>Original image</figcaption><img id="result-original" alt="Original uploaded image"></figure>
+              <figure><figcaption>Protected image</figcaption><img id="result-protected" alt="Protected image"></figure>
+            </div>
+            <div class="success-banner"><span>✓</span><div><strong>Protection applied</strong><small id="protection-detail">Image signed and ready to download.</small></div></div>
+            <div class="download-row">
+              <a id="download-protected" class="button primary" download>⇩ Download protected image</a>
+              <a id="download-provenance" class="button subtle" download>⌁ Provenance JSON</a>
+              <button id="check-chatgpt" class="button chatgpt-button" type="button" title="Download the protected image and open ChatGPT">✦ Check in ChatGPT</button>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <section id="details" class="details" hidden>
+        <div class="metrics panel"><div class="panel-heading"><h2>Quality metrics</h2><span>Original vs protected</span></div><div id="metrics-grid" class="metrics-grid"></div></div>
+        <div class="compression panel"><div class="panel-heading"><h2>Compression robustness</h2><span>JPEG test results</span></div><div class="table-wrap"><table><thead><tr><th>JPEG quality</th><th>PSNR</th><th>SSIM</th><th>MSE</th></tr></thead><tbody id="compression-body"></tbody></table></div></div>
+        <div class="images panel"><div class="panel-heading"><h2>Inspection images</h2><span>Difference ×12 and JPEG variants</span></div><div id="inspection-grid" class="inspection-grid"></div></div>
+        <div class="provenance panel"><div class="panel-heading"><h2>Provenance</h2><span id="provenance-status">Verified</span></div><p id="provenance-reason"></p><code id="provenance-hash"></code></div>
+        <div id="model-result" class="model panel" hidden></div>
+      </section>
+
+      <section id="how-it-works" class="how-it-works"><span>01</span><p><strong>Upload.</strong> CogniShield creates a subtle, edge-aware perturbation, tests compression resilience, then cryptographically signs the protected result.</p></section>
+    </main>
+  </div>
+  <div id="toast" class="toast" role="alert" hidden></div>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
