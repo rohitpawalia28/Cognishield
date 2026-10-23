@@ -3,127 +3,327 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="CogniShield image protection and provenance workspace">
-  <title>CogniShield · Image Protection</title>
+  <meta name="description" content="Protect images from AI misuse and sign them for provenance with CogniShield.">
+  <title>CogniShield · Protect an image</title>
+  <script>(function(){try{var t=localStorage.getItem("cognishield-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t;}catch(e){}})();</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body data-theme="dark">
-  <div class="app-shell">
-    <aside class="sidebar" aria-label="Protection settings">
-      <a class="brand" href="#top" aria-label="CogniShield home">
-        <span class="shield-mark">⌬</span><span>Cogni<span>Shield</span></span>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="masthead">
+    <div class="masthead-inner">
+      <a class="brand" href="{{ url_for('index') }}" aria-label="CogniShield home">
+        <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6 4.2 5.4v5.9c0 4.7 3.2 8.6 7.8 10.1 4.6-1.5 7.8-5.4 7.8-10.1V5.4z"/><path d="m8.4 12.2 2.5 2.5 4.8-5"/></svg>
+        <span class="brand-name">CogniShield</span>
       </a>
-      <p class="brand-note">Protect your images from AI misuse.</p>
+      <nav class="mainnav" aria-label="Main">
+        <a href="{{ url_for('index') }}" aria-current="page">Protect</a>
+        <a href="{{ url_for('how_it_works') }}">How it works</a>
+        <a href="{{ url_for('evaluation') }}">Evaluation</a>
+      </nav>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg>
+      </button>
+    </div>
+  </header>
 
-      <form id="protection-form">
-        <div class="sidebar-title"><span>Protection settings</span><span class="status-dot" title="Ready"></span></div>
+  <main id="main" class="protect">
+    <ol class="steps" aria-label="Protection steps">
+      <li><button type="button" class="step" data-go="1" aria-current="step"><span class="step-num">1</span><span class="step-label">Upload</span></button></li>
+      <li><button type="button" class="step" data-go="2" disabled><span class="step-num">2</span><span class="step-label">Settings</span></button></li>
+      <li><button type="button" class="step" data-go="3" disabled><span class="step-num">3</span><span class="step-label">Result</span></button></li>
+    </ol>
 
-        <label class="field-label" for="epsilon">Perturbation budget <output id="epsilon-value">8</output></label>
-        <input class="range" id="epsilon" name="epsilon" type="range" min="1" max="16" value="8">
-        <p class="field-help">Higher means stronger protection.</p>
-
-        <label class="field-label" for="iterations">Compression feedback <output id="iterations-value">4</output></label>
-        <input class="range" id="iterations" name="iterations" type="range" min="0" max="8" value="4">
-        <p class="field-help">Improves JPEG robustness.</p>
-
-        <label class="field-label" for="seed">Seed</label>
-        <div class="number-control">
-          <input id="seed" name="seed" type="number" min="0" max="999999" value="42">
-          <button type="button" class="number-button" data-step="-1" aria-label="Decrease seed">−</button>
-          <button type="button" class="number-button" data-step="1" aria-label="Increase seed">+</button>
+    <!-- Step 1: Upload -->
+    <section class="stage stage-upload" data-stage="1" aria-labelledby="upload-title">
+      <div class="hero">
+        <div class="intro">
+          <h1 id="upload-title" tabindex="-1" data-stage-title>Protect an image before you share it.</h1>
+          <p class="lede">CogniShield adds a change you can barely see that disrupts AI image-to-image models, checks that it survives JPEG compression, and signs the result so anyone can confirm it hasn't been altered.</p>
+          <ul class="trust" aria-label="What you get">
+            <li><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="4" width="14" height="10" rx="1.5"/><path d="M7 17h6M10 14v3"/></svg>Runs on your computer</li>
+            <li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2.5 4 4.8v4.6c0 3.7 2.5 6.7 6 7.9 3.5-1.2 6-4.2 6-7.9V4.8z"/><path d="m7.3 10 1.9 1.9 3.6-3.8"/></svg>Ed25519 signed</li>
+            <li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 15V5M8 15V8M13 15v-4M18 15H2"/></svg>JPEG-tested</li>
+          </ul>
         </div>
-        <p class="field-help">Same seed, same result.</p>
 
-        <fieldset class="jpeg-fieldset">
-          <legend class="field-label">JPEG tests</legend>
-          <div class="quality-options">
-            <label><input type="checkbox" name="qualities" value="95" checked><span>95</span></label>
-            <label><input type="checkbox" name="qualities" value="85"><span>85</span></label>
-            <label><input type="checkbox" name="qualities" value="75" checked><span>75</span></label>
-            <label><input type="checkbox" name="qualities" value="60"><span>60</span></label>
-            <label><input type="checkbox" name="qualities" value="50" checked><span>50</span></label>
+        <div class="upload-col">
+          <div id="drop-wrap" class="marked">
+            <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Choose an image to protect" aria-describedby="drop-hint">
+              <input id="image-input" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+              <div id="drop-empty" class="drop-empty">
+                <div class="specimen" aria-hidden="true">
+                  <svg class="specimen-art" viewBox="0 0 240 150" preserveAspectRatio="xMidYMid slice">
+                    <defs>
+                      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1f4f7a"/><stop offset="1" stop-color="#7fb0cf"/></linearGradient>
+                    </defs>
+                    <rect width="240" height="150" fill="url(#sky)"/>
+                    <circle cx="160" cy="70" r="26" fill="#f2b680"/>
+                    <path d="M0 108 C40 86 70 92 110 104 S190 90 240 100 V150 H0z" fill="#2f6b4f"/>
+                    <path d="M0 126 C50 112 100 120 150 128 S210 118 240 124 V150 H0z" fill="#214d39"/>
+                  </svg>
+                  <div class="specimen-protected"><svg class="specimen-art" viewBox="0 0 240 150" preserveAspectRatio="xMidYMid slice"><rect width="240" height="150" fill="url(#sky)"/><circle cx="160" cy="70" r="26" fill="#f2b680"/><path d="M0 108 C40 86 70 92 110 104 S190 90 240 100 V150 H0z" fill="#2f6b4f"/><path d="M0 126 C50 112 100 120 150 128 S210 118 240 124 V150 H0z" fill="#214d39"/></svg></div>
+                  <span class="specimen-line"></span>
+                  <span class="specimen-tag left">Original</span>
+                  <span class="specimen-tag right">Protected</span>
+                </div>
+                <p class="drop-title">Drop an image here</p>
+                <p id="drop-hint" class="drop-hint">PNG, JPG or WEBP, up to 200 MB</p>
+                <div class="drop-actions">
+                  <button id="browse-button" class="btn btn-primary btn-large" type="button">Choose image</button>
+                  <span class="paste-hint">or paste with <kbd>Ctrl</kbd> <kbd>V</kbd></span>
+                </div>
+              </div>
+              <div id="drop-preview" class="drop-preview" hidden>
+                <img id="preview-image" alt="">
+              </div>
+            </div>
           </div>
-          <p class="field-help">Test protection after compression.</p>
+          <div id="file-bar" class="file-bar" hidden>
+            <div class="file-meta"><strong id="file-name"></strong><span id="file-facts"></span></div>
+            <button id="replace-image" class="btn btn-quiet" type="button">Replace</button>
+            <button class="btn btn-primary" type="button" data-go="2">Continue to settings</button>
+          </div>
+        </div>
+      </div>
+
+      <ol class="how-row" aria-label="What happens to your image">
+        <li>
+          <span class="how-num">1</span>
+          <h2>Perturb</h2>
+          <p>Seeded, edge-aware noise is added inside a strict per-pixel budget, so the change stays hard to see.</p>
+        </li>
+        <li>
+          <span class="how-num">2</span>
+          <h2>Test</h2>
+          <p>The protected copy is recompressed at the JPEG qualities you pick, and CogniShield measures what survives.</p>
+        </li>
+        <li>
+          <span class="how-num">3</span>
+          <h2>Sign</h2>
+          <p>The protected PNG is hashed and signed with your local Ed25519 key, so anyone can verify it later.</p>
+        </li>
+      </ol>
+    </section>
+
+    <!-- Step 2: Settings -->
+    <section class="stage stage-settings" data-stage="2" aria-labelledby="settings-title" hidden>
+      <aside class="subject">
+        <div class="marked"><figure class="subject-frame"><img id="settings-thumb" alt="Image to protect"></figure></div>
+        <div class="subject-text">
+          <p id="settings-name" class="subject-name"></p>
+          <button class="btn btn-link" type="button" data-go="1">Change image</button>
+        </div>
+      </aside>
+
+      <form id="protection-form" class="settings" novalidate>
+        <h2 id="settings-title" tabindex="-1" data-stage-title>How strong should the protection be?</h2>
+        <p class="section-help">Stronger protection disrupts AI models more, but is more likely to leave a faint texture on flat areas like skies and walls. Balanced works for most photos.</p>
+
+        <fieldset class="presets">
+          <legend class="sr-only">Protection strength</legend>
+          <label class="preset">
+            <input type="radio" name="preset" value="4">
+            <span class="preset-body">
+              <span class="preset-name">Subtle</span>
+              <span class="preset-value">4 / 255</span>
+              <span class="preset-desc">Hardest to see. Lighter protection.</span>
+              <span class="grain" style="--level:.22" aria-hidden="true"></span>
+            </span>
+          </label>
+          <label class="preset">
+            <input type="radio" name="preset" value="8" checked>
+            <span class="preset-body">
+              <span class="preset-name">Balanced <span class="tag">Recommended</span></span>
+              <span class="preset-value">8 / 255</span>
+              <span class="preset-desc">Good protection that stays hard to notice.</span>
+              <span class="grain" style="--level:.45" aria-hidden="true"></span>
+            </span>
+          </label>
+          <label class="preset">
+            <input type="radio" name="preset" value="14">
+            <span class="preset-body">
+              <span class="preset-name">Strong</span>
+              <span class="preset-value">14 / 255</span>
+              <span class="preset-desc">Most disruption. Texture may show.</span>
+              <span class="grain" style="--level:.8" aria-hidden="true"></span>
+            </span>
+          </label>
         </fieldset>
 
-        <label class="check-row"><input id="run-model" type="checkbox"><span class="checkmark"></span><span>Run SD-Turbo target test</span></label>
-        <div id="prompt-wrap" class="prompt-wrap" hidden>
-          <label class="field-label" for="prompt">Target prompt</label>
-          <input id="prompt" name="prompt" type="text" value="a realistic portrait photograph, natural lighting">
+        <details class="finetune">
+          <summary>Fine-tune settings</summary>
+          <div class="finetune-grid">
+            <div class="field">
+              <label for="epsilon">Perturbation budget <output id="epsilon-value" for="epsilon">8</output></label>
+              <input class="range" id="epsilon" type="range" min="1" max="16" value="8">
+              <p class="help">Largest change allowed for any pixel, out of 255.</p>
+            </div>
+            <div class="field">
+              <label for="iterations">Compression feedback <output id="iterations-value" for="iterations">4</output></label>
+              <input class="range" id="iterations" type="range" min="0" max="8" value="4">
+              <p class="help">JPEG-aware passes. More passes hold up better after recompression.</p>
+            </div>
+            <div class="field">
+              <label for="seed">Seed</label>
+              <div class="stepper">
+                <input id="seed" type="number" min="0" max="999999" value="42" inputmode="numeric">
+                <button type="button" data-seed-step="-1" aria-label="Decrease seed">−</button>
+                <button type="button" data-seed-step="1" aria-label="Increase seed">+</button>
+              </div>
+              <p class="help">The same seed and settings always give the same result.</p>
+            </div>
+            <fieldset class="field">
+              <legend>Compression tests</legend>
+              <div class="chips">
+                <label class="chip"><input type="checkbox" name="qualities" value="95" checked><span>95</span></label>
+                <label class="chip"><input type="checkbox" name="qualities" value="85"><span>85</span></label>
+                <label class="chip"><input type="checkbox" name="qualities" value="75" checked><span>75</span></label>
+                <label class="chip"><input type="checkbox" name="qualities" value="60"><span>60</span></label>
+                <label class="chip"><input type="checkbox" name="qualities" value="50" checked><span>50</span></label>
+              </div>
+              <p class="help">JPEG qualities to test. Lower numbers mean heavier compression.</p>
+            </fieldset>
+            <div class="field field-wide">
+              <label class="switch">
+                <input id="run-model" type="checkbox">
+                <span class="switch-track" aria-hidden="true"></span>
+                <span class="switch-text"><strong>Run the SD-Turbo model test</strong><span class="help">Runs both images through a local diffusion model so you can compare what it makes of each. Needs the model installed and can take a few minutes.</span></span>
+              </label>
+              <div id="prompt-field" class="prompt-field" hidden>
+                <label for="prompt" class="field-label">Prompt for the model</label>
+                <input id="prompt" class="text-input" type="text" value="a realistic portrait photograph, natural lighting">
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <div class="settings-actions">
+          <button class="btn btn-quiet" type="button" data-go="1">Back</button>
+          <button id="protect-button" class="btn btn-primary btn-large" type="submit">Protect image</button>
         </div>
       </form>
+    </section>
 
-      <div class="sidebar-footer"><span class="pulse"></span> Local processing only</div>
-    </aside>
+    <!-- Step 3: Result -->
+    <section class="stage stage-result" data-stage="3" aria-labelledby="result-title" hidden>
+      <h2 id="result-title" class="sr-only" tabindex="-1" data-stage-title>Result</h2>
+      <div class="result-layout">
+        <div class="lighttable">
+          <div class="lighttable-bar">
+            <div class="view-switch" role="group" aria-label="How to view the result">
+              <button type="button" data-view="wipe" aria-pressed="true">Compare</button>
+              <button type="button" data-view="split" aria-pressed="false">Side by side</button>
+              <button type="button" data-view="diff" aria-pressed="false">Difference ×12</button>
+            </div>
+            <p id="wipe-legend" class="wipe-legend" hidden>Drag the divider to compare.</p>
+          </div>
 
-    <main id="top" class="workspace">
-      <header class="topbar">
-        <div><p class="eyebrow">Image safety workspace</p><h1>Cogni<span>Shield</span></h1></div>
-        <div class="header-actions">
-          <a href="{{ url_for('evaluation') }}" class="text-link">Evaluation</a>
-          <a href="{{ url_for('how_it_works') }}" class="text-link">How it works</a>
-          <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to light mode" aria-pressed="false"><span></span><i>☼</i><b>☾</b></button>
+          <div class="marked">
+            <div id="frame" class="frame">
+              <div id="view-wipe" class="view view-wipe" data-view-panel="wipe" style="--pos:50%" hidden>
+                <img id="wipe-protected" alt="Protected image">
+                <img id="wipe-original" class="wipe-top" alt="Original image">
+                <input id="wipe-range" class="wipe-range" type="range" min="0" max="100" value="50" aria-label="Divider position between original and protected image">
+                <span class="wipe-handle" aria-hidden="true"></span>
+                <span class="corner-label left" aria-hidden="true">Original</span>
+                <span class="corner-label right" aria-hidden="true">Protected</span>
+              </div>
+              <div class="view view-split" data-view-panel="split" hidden>
+                <figure><img id="split-original" alt="Original image"><figcaption class="corner-label left">Original</figcaption></figure>
+                <figure><img id="split-protected" alt="Protected image"><figcaption class="corner-label right">Protected</figcaption></figure>
+              </div>
+              <div class="view view-diff" data-view-panel="diff" hidden>
+                <img id="diff-image" alt="Difference between the original and protected image, magnified twelve times">
+                <p class="diff-caption">Pixel changes magnified 12 times. Brighter areas changed more.</p>
+              </div>
+              <div id="scanning" class="scanning" hidden>
+                <img id="scan-image" alt="">
+                <span class="scanline" aria-hidden="true"></span>
+              </div>
+            </div>
+          </div>
         </div>
-      </header>
 
-      <section class="hero-copy">
-        <p>Edge-based adversarial immunization and signed provenance for digital images.</p>
-      </section>
-
-      <section class="work-grid" aria-label="Image protection workflow">
-        <section class="upload-panel panel">
-          <div id="dropzone" class="dropzone" role="button" tabindex="0" aria-label="Upload an image">
-            <input id="image-input" name="image" type="file" accept="image/png,image/jpeg,image/webp" hidden>
-            <div id="upload-empty" class="upload-empty">
-              <div class="upload-icon">⇧</div>
-              <h2>Upload an image</h2>
-              <p>Drag and drop an image here, or select one from your device.</p>
-              <button id="browse-button" class="button primary" type="button">Choose image</button>
-              <small>PNG, JPG or WEBP · Max 200 MB</small>
-            </div>
-            <div id="upload-preview" class="upload-preview" hidden>
-              <img id="preview-image" alt="Selected image preview">
-              <div><strong id="file-name"></strong><span>Ready to protect</span></div>
-              <button id="change-image" class="icon-button" type="button" aria-label="Choose another image">↻</button>
-            </div>
+        <aside class="verdict" aria-live="polite">
+          <div id="verdict-working" hidden>
+            <p class="state state-working">Protecting</p>
+            <h3>Working on your image</h3>
+            <p id="working-detail" class="help"></p>
           </div>
-          <button id="protect-button" class="button protect-button" type="button" disabled><span>⌬</span> Protect image</button>
-          <p id="upload-message" class="upload-message" role="status">Choose an image to begin.</p>
-        </section>
-
-        <section class="results-panel panel" aria-live="polite">
-          <div class="panel-heading"><h2>Result</h2><span id="result-state" class="result-state">Waiting</span></div>
-          <div id="result-empty" class="result-empty"><div>✦</div><p>Your protected image will appear here.</p></div>
-          <div id="result-content" hidden>
-            <div class="image-comparison">
-              <figure><figcaption>Original image</figcaption><img id="result-original" alt="Original uploaded image"></figure>
-              <figure><figcaption>Protected image</figcaption><img id="result-protected" alt="Protected image"></figure>
-            </div>
-            <div class="success-banner"><span>✓</span><div><strong>Protection applied</strong><small id="protection-detail">Image signed and ready to download.</small></div></div>
-            <div class="download-row">
-              <a id="download-protected" class="button primary" download>⇩ Download protected image</a>
-              <a id="download-provenance" class="button subtle" download>⌁ Provenance JSON</a>
-              <button id="check-chatgpt" class="button chatgpt-button" type="button" title="Download the protected image and open ChatGPT">✦ Check in ChatGPT</button>
-            </div>
+          <div id="verdict-error" hidden>
+            <p class="state state-error">Not protected</p>
+            <h3>Protection didn't finish</h3>
+            <p id="error-text" class="help"></p>
+            <button class="btn btn-primary" type="button" data-go="2">Back to settings</button>
           </div>
-        </section>
-      </section>
+          <div id="verdict-done" hidden>
+            <p id="sig-state" class="state state-ok">Signed and verified</p>
+            <h3>Your protected image is ready</h3>
+            <dl class="facts">
+              <div><dt>Strength</dt><dd id="fact-strength">—</dd></div>
+              <div><dt>PSNR</dt><dd id="fact-psnr">—</dd></div>
+              <div><dt>SSIM</dt><dd id="fact-ssim">—</dd></div>
+              <div><dt>Lowest JPEG SSIM</dt><dd id="fact-jpeg">—</dd></div>
+            </dl>
+            <div class="downloads">
+              <a id="download-protected" class="btn btn-primary btn-block" download>Download protected image</a>
+              <a id="download-provenance" class="btn btn-quiet btn-block" download>Download provenance record</a>
+              <button id="check-chatgpt" class="btn btn-quiet btn-block" type="button">Test it in ChatGPT</button>
+            </div>
+            <button id="start-over" class="btn btn-link" type="button">Protect another image</button>
+          </div>
+        </aside>
+      </div>
 
-      <section id="details" class="details" hidden>
-        <div class="metrics panel"><div class="panel-heading"><h2>Quality metrics</h2><span>Original vs protected</span></div><div id="metrics-grid" class="metrics-grid"></div></div>
-        <div class="compression panel"><div class="panel-heading"><h2>Compression robustness</h2><span>JPEG test results</span></div><div class="table-wrap"><table><thead><tr><th>JPEG quality</th><th>PSNR</th><th>SSIM</th><th>MSE</th></tr></thead><tbody id="compression-body"></tbody></table></div></div>
-        <div class="images panel"><div class="panel-heading"><h2>Inspection images</h2><span>Difference ×12 and JPEG variants</span></div><div id="inspection-grid" class="inspection-grid"></div></div>
-        <div class="provenance panel"><div class="panel-heading"><h2>Provenance</h2><span id="provenance-status">Verified</span></div><p id="provenance-reason"></p><code id="provenance-hash"></code></div>
-        <div id="model-result" class="model panel" hidden></div>
-      </section>
+      <section id="report" class="report" aria-label="Detailed results" hidden>
+        <div class="tabs" role="tablist" aria-label="Result details">
+          <button type="button" role="tab" id="tab-quality" aria-controls="panel-quality" aria-selected="true">Quality</button>
+          <button type="button" role="tab" id="tab-jpeg" aria-controls="panel-jpeg" aria-selected="false" tabindex="-1">JPEG tests</button>
+          <button type="button" role="tab" id="tab-inspect" aria-controls="panel-inspect" aria-selected="false" tabindex="-1">Inspection images</button>
+          <button type="button" role="tab" id="tab-provenance" aria-controls="panel-provenance" aria-selected="false" tabindex="-1">Provenance</button>
+          <button type="button" role="tab" id="tab-model" aria-controls="panel-model" aria-selected="false" tabindex="-1" hidden>SD-Turbo test</button>
+        </div>
 
-      <section id="how-it-works" class="how-it-works"><span>01</span><p><strong>Upload.</strong> CogniShield creates a subtle, edge-aware perturbation, tests compression resilience, then cryptographically signs the protected result.</p></section>
-    </main>
-  </div>
-  <div id="toast" class="toast" role="alert" hidden></div>
+        <div role="tabpanel" id="panel-quality" aria-labelledby="tab-quality" tabindex="0">
+          <p class="panel-help">How close the protected image is to the original. A higher PSNR and an SSIM near 1.0 mean the change is harder to see.</p>
+          <div id="metrics-grid" class="metric-row"></div>
+        </div>
+        <div role="tabpanel" id="panel-jpeg" aria-labelledby="tab-jpeg" tabindex="0" hidden>
+          <p class="panel-help">Shared images are often recompressed. Each row compares the original with the protected image after JPEG compression at that quality.</p>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th scope="col">JPEG quality</th><th scope="col">PSNR</th><th scope="col">SSIM</th><th scope="col">MSE</th></tr></thead>
+              <tbody id="compression-body"></tbody>
+            </table>
+          </div>
+        </div>
+        <div role="tabpanel" id="panel-inspect" aria-labelledby="tab-inspect" tabindex="0" hidden>
+          <p class="panel-help">Open any image at full size to look closely at the perturbation and at how it holds up after compression.</p>
+          <div id="inspection-grid" class="inspect-grid"></div>
+        </div>
+        <div role="tabpanel" id="panel-provenance" aria-labelledby="tab-provenance" tabindex="0" hidden>
+          <div class="provenance-box">
+            <p id="provenance-status" class="state state-ok">Verified</p>
+            <p id="provenance-reason" class="provenance-reason"></p>
+            <p class="field-label">SHA-256 of the protected PNG</p>
+            <code id="provenance-hash" class="hash"></code>
+            <p class="help">The provenance record proves this file matches the bytes that were signed. It doesn't prove the scene is real or who created it.</p>
+          </div>
+        </div>
+        <div role="tabpanel" id="panel-model" aria-labelledby="tab-model" tabindex="0" hidden>
+          <div id="model-result"></div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>
